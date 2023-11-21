@@ -1,0 +1,99 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => TaskProvider(),
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: AuthenticationPage(),
+    );
+  }
+}
+
+class AuthenticationPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Implement user authentication UI
+    return Container(); // Add your authentication UI here
+  }
+}
+
+class Task {
+  final String title;
+  final String description;
+  final DateTime dueDate;
+  bool isCompleted;
+
+  const Task({required this.title, required this.description, required this.dueDate, this.isCompleted = false});
+}
+
+class TaskProvider extends ChangeNotifier {
+  List<Task> tasks = [];
+
+  void addTask(Task task) {
+    tasks.add(task);
+    notifyListeners();
+  }
+  // Implement other CRUD operations as needed.
+}
+
+class TaskListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var tasks = Provider.of<TaskProvider>(context).tasks;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Task List'),
+      ),
+      body: ListView.builder(
+        itemCount: tasks.length,
+        itemBuilder: (context, index) {
+          var task = tasks[index];
+          return ListTile(
+            title: const Text(task.title),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(task.description),
+                Text('Due Date: ${task.dueDate.toString()}'),
+                Text('Status: ${task.isCompleted ? 'Completed' : 'Pending'}'),
+              ],
+            ),
+            trailing: Checkbox(
+              value: task.isCompleted,
+              onChanged: (value) {
+                // Add logic to update task status
+                task.isCompleted = value ?? false;
+                Provider.of<TaskProvider>(context, listen: false).notifyListeners();
+              },
+            ),
+            onTap: () {
+              // Add navigation or additional actions when tapping on a task
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add logic to navigate to AddTaskPage or show a dialog to add a new task
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
